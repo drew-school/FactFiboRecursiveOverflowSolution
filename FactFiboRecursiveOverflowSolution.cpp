@@ -34,14 +34,15 @@ using namespace chrono;
 
 void calculateTimeFactorialLoopFunc(void);
 void calculateTimeFactorialRecursiveFunc(void);
-void factorialRecursiveFunc(uint32_t & i, uint32_t iResult);
+void factorialRecursiveFunc(uint32_t & i, uint32_t prevFactorial);
 
 void calculateTimeFibonacciLoopFunc(void);
 void calculateTimeFibonacciRecursiveFunc(void);
-void fibonacciRecursiveFunc(uint32_t & i, uint32_t num0, uint32_t num1, uint32_t & sum);
+void fibonacciRecursiveFunc(uint32_t & i, uint32_t prevNum0, uint32_t prevNum1, uint32_t & sum);
 
 int main()
 {
+	// formats all numbers >999 to include separating commas
 	cout.imbue(locale(""));
 
 	cout << "32 bit unsigned Factorial Loop" << endl;
@@ -73,12 +74,15 @@ void calculateTimeFactorialLoopFunc(void)
 {
 	auto timeStart = steady_clock::now();
 
-	uint32_t i = 1, iResult = 1;
-	for (; SafeMultiply<uint32_t, uint32_t>(iResult, i, iResult); i++)
+	uint32_t i = 1, prevFactorial = 1;
+	// multiply current number i by factorial of previous number
+	// if it overflows, return
+	for (; SafeMultiply<uint32_t, uint32_t>(prevFactorial, i, prevFactorial); i++)
 	{
-		cout << setw(3) << i << setw(30) << iResult << endl;
+		cout << setw(3) << i << setw(30) << prevFactorial << endl;
 	}
 
+	// finds time taken by the loop
 	auto timeTaken = duration_cast<nanoseconds> (steady_clock::now() - timeStart);
 
 	cout << endl;
@@ -91,8 +95,10 @@ void calculateTimeFactorialRecursiveFunc(void)
 {
 	auto timeStart = steady_clock::now();
 
-	uint32_t i = 1, iResult = 1;
-	factorialRecursiveFunc(i, iResult);
+	uint32_t i = 1, prevFactorial = 1;
+	factorialRecursiveFunc(i, prevFactorial);
+
+	// finds time taken by the recursive function
 	auto timeTaken = duration_cast<nanoseconds> (steady_clock::now() - timeStart);
 
 	cout << endl;
@@ -100,12 +106,14 @@ void calculateTimeFactorialRecursiveFunc(void)
 	cout << "Time Elapsed (nano)    : " << setw(15) << timeTaken.count() << endl;
 }
 
-void factorialRecursiveFunc(uint32_t & i, uint32_t iResult)
+void factorialRecursiveFunc(uint32_t & i, uint32_t prevFactorial)
 {
-	if (SafeMultiply<uint32_t, uint32_t>(iResult, i, iResult))
+	// multiply current number i by factorial of previous number
+	// if it overflows, return
+	if (SafeMultiply<uint32_t, uint32_t>(prevFactorial, i, prevFactorial))
 	{
-		cout << setw(3) << i << setw(30) << iResult << endl;
-		factorialRecursiveFunc(++i, iResult);
+		cout << setw(3) << i << setw(30) << prevFactorial << endl;
+		factorialRecursiveFunc(++i, prevFactorial);
 	}
 }
 
@@ -113,17 +121,21 @@ void calculateTimeFibonacciLoopFunc(void)
 {
 	auto timeStart = steady_clock::now();
 
+	// output first two terms of fibonacci series (0 and 1)
 	cout << setw(3) << 0 << setw(30) << 0 << endl;
 	cout << setw(3) << 1 << setw(30) << 1 << endl;
 
-	uint32_t i = 2, num0 = 0, num1 = 1, sum;
-	for (; SafeAdd<uint32_t, uint32_t>(num0, num1, sum); i++)
+	uint32_t i = 2, prevNum0 = 0, prevNum1 = 1, sum;
+	// add previous two numbers (prevNum0 and prevNum1)
+	// if sum overflows, return
+	for (; SafeAdd<uint32_t, uint32_t>(prevNum0, prevNum1, sum); i++)
 	{
 		cout << setw(3) << i << setw(30) << sum << endl;
-		num0 = num1;
-		num1 = sum;
+		prevNum0 = prevNum1;
+		prevNum1 = sum;
 	}
 
+	// finds time taken by the loop
 	auto timeTaken = duration_cast<nanoseconds> (steady_clock::now() - timeStart);
 
 	cout << endl;
@@ -133,15 +145,16 @@ void calculateTimeFibonacciLoopFunc(void)
 
 void calculateTimeFibonacciRecursiveFunc(void)
 {
-	//this func gets timing, other func actually does the factorial math
-	uint32_t i = 0, sum, num0 = 0, num1 = 1;
+	uint32_t i = 0, sum, prevNum0 = 0, prevNum1 = 1;
 
 	auto timeStart = steady_clock::now();
 
-	cout << setw(3) <<   i << setw(30) << num0 << endl;
-	cout << setw(3) << ++i << setw(30) << num1 << endl;
-	fibonacciRecursiveFunc(++i,num0,num1,sum);
+	// output first two terms of fibonacci series (0 and 1)
+	cout << setw(3) <<   i << setw(30) << prevNum0 << endl;
+	cout << setw(3) << ++i << setw(30) << prevNum1 << endl;
+	fibonacciRecursiveFunc(++i,prevNum0,prevNum1,sum);
 
+	// finds time taken by the recursive function
 	auto timeTaken = duration_cast<nanoseconds> (steady_clock::now() - timeStart);
 
 	cout << endl;
@@ -150,12 +163,14 @@ void calculateTimeFibonacciRecursiveFunc(void)
 }
 
 
-void fibonacciRecursiveFunc(uint32_t & i, uint32_t num0, uint32_t num1, uint32_t & sum)
+void fibonacciRecursiveFunc(uint32_t & i, uint32_t prevNum0, uint32_t prevNum1, uint32_t & sum)
 {
-	if (SafeAdd<uint32_t, uint32_t>(num0, num1, sum))
+	// add previous two numbers (prevNum0 and prevNum1)
+	// if sum overflows, return
+	if (SafeAdd<uint32_t, uint32_t>(prevNum0, prevNum1, sum))
 	{
 		cout << setw(3) << i << setw(30) << sum << endl;
-		fibonacciRecursiveFunc(++i, num1, sum, sum);
+		fibonacciRecursiveFunc(++i, prevNum1, sum, sum);
 	}
 	return;
 }
